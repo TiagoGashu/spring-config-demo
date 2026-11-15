@@ -1,0 +1,49 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+
+  security:
+    user:
+      name: ${CONFIG_USER:config}
+      password: ${CONFIG_PASSWORD:s3cret}
+
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+
+  cloud:
+    bus:
+      enabled: true
+      refresh:
+        enabled: true
+    config:
+      server:
+        git:
+          # Remote repo in real life, e.g. https://github.com/your-org/config-repo
+          # Local test: the config-repo folder must be a git repo (git init -b main && git add . && git commit)
+          uri: ${CONFIG_GIT_URI:file://${user.home}/workspace/spring-config-demo/config-repo}
+          default-label: main
+          clone-on-start: true
+          force-pull: true
+          refresh-rate: 0            # always check the repo on request
+          timeout: 10
+          # username: ${GIT_USER}
+          # password: ${GIT_TOKEN}
+
+# Used to decrypt {cipher}... values stored in the repo
+encrypt:
+  key: ${ENCRYPT_KEY:change-me-please-32-chars-min!!}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,busrefresh,busenv,refresh
+  endpoint:
+    health:
+      show-details: when-authorized
